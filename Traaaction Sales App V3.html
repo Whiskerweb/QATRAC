@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traaaction - Script Call V3</title>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --accent: #059669;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 550px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border);
+        }
+        .header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 5px 0 0 0;
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        .back-btn {
+            position: absolute;
+            left: 15px;
+            top: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: none;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
+        .content {
+            padding: 24px;
+            flex-grow: 1;
+        }
+        .step-title {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .script-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+        }
+        .stat-box {
+            background-color: #d1fae5;
+            border-left: 4px solid var(--accent);
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #065f46;
+            display: none;
+        }
+        .script-action {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .btn {
+            background-color: white;
+            border: 2px solid var(--border);
+            color: var(--text-main);
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .btn:hover {
+            border-color: var(--primary);
+            background-color: #f0f9ff;
+            color: var(--primary);
+        }
+        .btn::after {
+            content: '→';
+            opacity: 0.5;
+        }
+        .btn.restart {
+            background-color: var(--text-main);
+            color: white;
+            border-color: var(--text-main);
+            justify-content: center;
+        }
+        .btn.restart::after { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <button id="backBtn" class="back-btn">⬅ Retour</button>
+        <h1>Traaaction - Vente Fluide V3</h1>
+        <p>Script ajusté sur vos recommandations</p>
+    </div>
+    <div class="content">
+        <div id="stepTitle" class="step-title">Étape 1</div>
+        <div id="scriptText" class="script-text">Chargement...</div>
+        <div id="statBox" class="stat-box"></div>
+        <div id="scriptAction" class="script-action">Écoutez la réponse du client...</div>
+        <div id="optionsContainer" class="options"></div>
+    </div>
+</div>
+
+<script>
+    const story = {
+        start: {
+            title: "Étape 1 : Le Cadre (Sandler)",
+            text: "« Bonjour [Prénom], on a 15 min ensemble aujourd'hui. L'idée n'est pas de faire un monologue sur Traaaction, mais de vous poser quelques questions sur votre acquisition. Si on peut vous aider, je vous le dirai, sinon je serai transparent. Ça vous va ? »",
+            action: "Attendez la validation du prospect",
+            choices: [
+                { label: "✅ Oui, ça me va", next: "decouverte" },
+                { label: "⏱️ Pas trop le temps", next: "objection_temps" }
+            ]
+        },
+        objection_temps: {
+            title: "Objection : Temps",
+            text: "« Je comprends. Est-ce qu'on prend juste 2 minutes pour voir si ça vaut le coup de se reparler, ou vous préférez reprogrammer ? »",
+            action: "S'adapter à sa disponibilité",
+            choices: [
+                { label: "▶️ Ok pour 2 min", next: "decouverte" },
+                { label: "📅 Reprogrammer", next: "fin" }
+            ]
+        },
+        decouverte: {
+            title: "Étape 2 : Découverte",
+            text: "« Super. Comment trouvez-vous vos clients aujourd'hui ? Quelle est la part du bouche-à-oreille ? <br><br><i>... Beaucoup essaient de structurer ça avec l'affiliation mais repoussent le projet. Qu'est-ce qui vous a freiné jusqu'ici ?</i> »",
+            action: "Identifiez sa douleur principale",
+            choices: [
+                { label: "💰 Ça coûte trop cher", next: "douleur_budget" },
+                { label: "⚙️ L'intégration technique", next: "douleur_tech" },
+                { label: "🤝 Je n'ai pas d'affiliés", next: "douleur_reseau" },
+                { label: "🛠️ J'utilise déjà un outil", next: "objection_concurrence" }
+            ]
+        },
+        objection_concurrence: {
+            title: "Objection : Utilise déjà un outil",
+            text: "« C'est super, ça veut dire que vous avez déjà validé le canal ! Sans indiscrétion, qu'est-ce qui vous frustre le plus avec cet outil aujourd'hui ? Les frais fixes importants ? L'intégration technique ? »",
+            action: "Identifiez pourquoi il accepterait d'en changer",
+            choices: [
+                { label: "💰 L'outil actuel coûte trop cher", next: "douleur_budget" },
+                { label: "⚙️ L'outil est lourd à gérer", next: "douleur_tech" }
+            ]
+        },
+        douleur_budget: {
+            title: "Étape 3 : Creuser le Budget",
+            text: "« Vous avez tout à fait raison. Beaucoup de plateformes sont trop chères au départ et demandent des frais fixes alors que ça ne garantit pas de résultats. En vérité, un programme d'affiliation, ça dépend uniquement de la performance de la startup. <br><br><i>... C'est pour ça qu'on a décidé de proposer un plan gratuit très généreux jusqu'à 500 euros de CA mensuel.</i> »",
+            action: "Laissez-le réagir sur la pertinence de ce modèle",
+            choices: [
+                { label: "➡️ Voir l'impact", next: "implication_budget" }
+            ]
+        },
+        douleur_tech: {
+            title: "Étape 3 : Creuser la Technique",
+            text: "« C'est souvent ce qu'on pense. Mais en réalité, notre tracking est ultra simple et rapide : juste 4 blocs de code à copier-coller (dont un proxy). Vous avez un CTO en interne ou vous passez par des freelances ? <br><br><i>... Parce que si vous payez un freelance pour ça, c'est dommage. Notre équipe technique peut s'en charger pour vous, totalement gratuitement.</i> »",
+            action: "Laissez-le comprendre qu'il n'a rien à coder",
+            choices: [
+                { label: "➡️ Voir l'impact", next: "implication_tech" }
+            ]
+        },
+        douleur_reseau: {
+            title: "Étape 3 : Creuser le Réseau",
+            text: "« C'est une crainte super courante, mais en fait c'est très simple : vos meilleurs affiliés sont déjà là. Vos utilisateurs actuels, vos vendeurs, ou toute personne en contact avec votre produit sont vos premiers ambassadeurs. <br><br><i>... Avez-vous un moyen de communiquer facilement avec eux aujourd'hui pour leur annoncer ça ?</i> »",
+            action: "Faites-lui réaliser qu'il a déjà sa base d'affiliés",
+            choices: [
+                { label: "➡️ Voir l'impact", next: "implication_reseau" }
+            ]
+        },
+        implication_budget: {
+            title: "Étape 4 : Implication (Budget)",
+            text: "« Donc avec ce modèle gratuit jusqu'à 500€ de CA généré, vous supprimez totalement le risque financier. Quel impact ça aurait sur votre croissance de lancer ce programme dès maintenant, sans rien payer d'avance ? »",
+            action: "Silence. Laissez-le répondre.",
+            choices: [
+                { label: "💡 Présenter la Solution", next: "solution_budget" }
+            ]
+        },
+        implication_tech: {
+            title: "Étape 4 : Implication (Technique)",
+            text: "« Donc si on retire complètement cette charge technique de vos épaules grâce à notre équipe qui s'en occupe gratuitement, qu'est-ce qui vous empêcherait d'activer ce canal de vente aujourd'hui ? »",
+            action: "Silence. Laissez-le répondre.",
+            choices: [
+                { label: "💡 Présenter la Solution", next: "solution_tech" }
+            ]
+        },
+        implication_reseau: {
+            title: "Étape 4 : Implication (Réseau)",
+            text: "« Donc si on vous donne l'outil clé en main pour transformer instantanément vos clients et contacts en apporteurs d'affaires, combien de ventes supplémentaires ça pourrait générer selon vous ? »",
+            action: "Silence. Laissez-le répondre.",
+            choices: [
+                { label: "💡 Présenter la Solution", next: "solution_reseau" }
+            ]
+        },
+        solution_budget: {
+            title: "Étape 5 : Pitch Final (Budget)",
+            text: "« Concrètement, vous créez votre programme sur Traaaction et ça ne vous coûte rien. Vous ne basculez sur un plan payant que lorsque l'outil vous rapporte concrètement de l'argent. L'outil s'autofinance. »",
+            stat: "💡 Argument choc : 'Notre modèle aligne nos intérêts sur les vôtres. Zéro risque, vous êtes rentable avant même de nous payer le premier centime.'",
+            action: "Observez sa réaction",
+            choices: [
+                { label: "🔥 Il est partant", next: "closing" },
+                { label: "🤔 Il doute de la technique", next: "douleur_tech" }
+            ]
+        },
+        solution_tech: {
+            title: "Étape 5 : Pitch Final (Technique)",
+            text: "« L'intégration des Webhooks Stripe est 100% gérée par notre équipe si vous le souhaitez. Une fois en place, Traaaction est autonome : il calcule les commissions, gère les abonnements et les remboursements tout seul. »",
+            stat: "💡 Argument choc : 'Vous gardez votre équipe technique concentrée sur votre produit. On vous livre une machine d'acquisition clé en main.'",
+            action: "Observez sa réaction",
+            choices: [
+                { label: "🔥 Il est partant", next: "closing" },
+                { label: "🤔 Il s'inquiète du budget", next: "douleur_budget" }
+            ]
+        },
+        solution_reseau: {
+            title: "Étape 5 : Pitch Final (Réseau)",
+            text: "« On vous fournit un portail d'affiliation en marque blanche, totalement modifiable sans code (vos couleurs, votre logo). Vous envoyez juste ce lien à votre base client, et ils s'occupent du reste. »",
+            stat: "💡 Argument choc : 'Un client satisfait qui vous recommande convertit 4 fois plus qu'un prospect froid. Traaaction transforme vos clients actuels en force de vente.'",
+            action: "Observez sa réaction",
+            choices: [
+                { label: "🔥 Il est partant", next: "closing" },
+                { label: "🤔 Il s'inquiète de la technique", next: "douleur_tech" }
+            ]
+        },
+        closing: {
+            title: "Étape 6 : Closing Sans Pression",
+            text: "« Par rapport à ce qu'on vient de voir, est-ce que ça vous semble pertinent ? <br><br><i>Vu que le lancement est gratuit et l'intégration offerte, la suite logique serait de créer votre compte ensemble. Ça prend 30 secondes, vous êtes devant votre clavier ?</i> »",
+            action: "Accompagnez-le sur le site",
+            choices: [
+                { label: "🎉 Vente conclue ! (Recommencer)", next: "start" }
+            ]
+        },
+        fin: {
+            title: "Fin de l'appel",
+            text: "« Très bien, je vous envoie un mail récapitulatif avec nos coordonnées. Bonne journée ! »",
+            action: "Appel terminé",
+            choices: [
+                { label: "🔄 Nouvel Appel", next: "start" }
+            ]
+        }
+    };
+
+    let historyStack = [];
+    let currentNode = 'start';
+
+    const titleEl = document.getElementById('stepTitle');
+    const textEl = document.getElementById('scriptText');
+    const statBoxEl = document.getElementById('statBox');
+    const actionEl = document.getElementById('scriptAction');
+    const optionsEl = document.getElementById('optionsContainer');
+    const backBtn = document.getElementById('backBtn');
+
+    function renderNode(nodeKey) {
+        const node = story[nodeKey];
+        titleEl.innerHTML = node.title;
+        textEl.innerHTML = node.text;
+        actionEl.innerHTML = node.action;
+
+        if (node.stat) {
+            statBoxEl.innerHTML = node.stat;
+            statBoxEl.style.display = 'block';
+        } else {
+            statBoxEl.style.display = 'none';
+        }
+
+        optionsEl.innerHTML = '';
+        node.choices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.className = choice.next === 'start' ? 'btn restart' : 'btn';
+            btn.innerHTML = choice.label;
+            btn.onclick = () => {
+                if(nodeKey !== 'start') historyStack.push(nodeKey);
+                currentNode = choice.next;
+                if(currentNode === 'start') historyStack = [];
+                renderNode(currentNode);
+            };
+            optionsEl.appendChild(btn);
+        });
+
+        backBtn.style.display = historyStack.length > 0 ? 'block' : 'none';
+    }
+
+    backBtn.onclick = () => {
+        if (historyStack.length > 0) {
+            currentNode = historyStack.pop();
+            renderNode(currentNode);
+        }
+    };
+
+    // Init
+    renderNode('start');
+</script>
+
+</body>
+</html>
